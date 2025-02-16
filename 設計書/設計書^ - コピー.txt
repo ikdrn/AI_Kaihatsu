@@ -1,0 +1,23 @@
+ファイルパスに機能のフォルダを用意しておいて、
+
+---
+
+## 1. アーキテクチャ
+
+- **フロントエンド**: HTML Living Standard
+- **バックエンド**: Go言語
+- **データベース**: Google Cloud Platform (GCP) の MySQL
+
+## 2. データベース接続情報
+
+- **ホスト名**: `35.187.220.47`
+- **ポート**: `3306`
+- **ユーザー名**: `root`
+- **パスワード**: `oG-VtEz2#"rHEq9*`
+- **データベース名**: `testMySQL`
+
+## 3. APIキー
+
+- **Google APIキー**: `AIzaSyDzzFJHOufbGMSBAUg6OFoUCllv_IuY5sw`
+
+---

@@ -1,0 +1,5 @@
+インスタンスID: my-mysql-instance
+パスワード: oG-VtEz2#"rHEq9*
+データベース名: testMySQL
+
+パブリックhost: 35.187.220.47

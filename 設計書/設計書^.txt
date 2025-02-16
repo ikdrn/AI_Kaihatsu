@@ -1,0 +1,58 @@
+AIを使用して設計書を執筆するWebアプリケーションを作成したいです。
+
+1.アーキテクチャ
+- HTML Living Standard
+- Go (Ginフレームワーク)  
+- GCP MySQL
+
+2. **データベース接続情報**  ソースコード（Goファイル内など）でハードコード。  
+     - **hostname**: `35.187.220.47`  
+     - **port**: `3306`  
+     - **username**: `root`  
+     - **password**: `oG-VtEz2#"rHEq9*`
+     - **database**: `testMySQL`  
+
+3. **APIキー** ソースコード（Goファイル内など）でハードコード。  
+- Google API key: `AIzaSyDzzFJHOufbGMSBAUg6OFoUCllv_IuY5sw`
+
+4.テーブル一覧
+**UserItiran**
+   - `USERID` (PK)  
+   - `USERNM` (ユーザー名)  
+   - `USERML` (メールアドレス)  
+   - `USERPW` (パスワード / ハッシュ化はしない)  
+   - `USERDT` (登録日, YYYYMMDD)  
+   - `USERTM` (登録時刻, HHMMSS)
+
+**Youken**  
+   - `YOUKID` (要件ID, PK)  
+   - `YOUSER` (ユーザーID, FK)  
+   - `YOMKTK` (目的 / 要件概要)  
+   - `YOYSAN` (予算)  
+   - `YONOKI` (納期, YYYYMMDD)  
+   - `YODATE` (作成日, YYYYMMDD)  
+   - `YOTIME` (作成時刻, HHMMSS)  
+
+**Teian**  
+   - `TEIAID` (提案ID, PK)  
+   - `TEUSER` (ユーザーID, FK)  
+   - `TEIANN` (AI提案内容を格納)  
+
+**Sentaku**  
+   - `SENTID` (選択ID, PK)  
+   - `SEUSER` (ユーザーID)  
+   - `SEDSGN` (選択デザイン)  
+   - `STKINO` (機能選択,JSON)
+   - `STKOSU` (最終工数)  
+   - `STNOKI` (最終納期, YYYYMMDD)  
+   - `STPRCE` (最終価格)  
+   - `STDATE` (作成日, YYYYMMDD)  
+   - `STTIME` (作成時刻, HHMMSS)
+
+5.画面一覧
+画面,ファイル名,詳細
+ログイン画面,login.html,メールアドレスとパスワードでログインする。(UserItiranテーブルを参照する。)新規登録はこちらのリンク
+新規登録画面,register.html,ユーザ名とメアドとパスワードで新規登録をする。(UserItiranにインサートする。)ログインはこちらのリンク
+メイン画面,main.html,見積作成画面と過去見積画面に遷移する。カーソルを合わせたらちょっと動くCSS。ヘッダーにはユーザ名(共通)
+見積作成画面,estimate.html,クライアント入力「予算(ドロップダウン)、目的(テキストボックス)、納期(カレンダー)」、『AI提案』ボタンでクライアントが入力したものをYoukenテーブルにインサートする、AI出力「整理する、課題と目標の明確化、システム全体像の明確化、要件を細分化する、機能要件定義、非機能要件定義、システム的に実現可能か、予算的に実現可能か、必要なスキル感、納期から算出される必要工数、」Teianテーブルにインサートする。クライアント選択「AIが出力した機能で必要な機能を選択するチェックボックス、それによって工数の算出、それによって納期を算出、それによって価格を算出」『確定』ボタンを押下するとSentakuテーブルにインサート
+過去見積画面,history.html,YoukenやTeianやSentakuテーブルから過去の見積作成を表示する。

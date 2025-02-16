@@ -1,0 +1,12 @@
+services:
+  backend:
+    build: ./ai_back
+    ports:
+      - "8080:8080"
+    container_name: ai_backend
+
+  frontend:
+    build: ./ai_front
+    ports:
+      - "3000:80"
+    container_name: ai_frontend

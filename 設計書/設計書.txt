@@ -1,0 +1,338 @@
+# 1. 要件定義書
+
+## 1.1 サービス名
+
+- **サービス名**: AiMitz
+- **由来**: 「AI + 見積（mitsumori）」を短縮化。
+- **特徴**: AIを活用して見積（要件定義～提案）を半自動化するサービス。
+
+## 1.2 システム概要
+
+- **目的**: Web/スマホなど複数デバイスからアクセスできる形で、顧客が要件を入力すると、AIが工数やデザインを提案して見積もりをサポートする。
+- **想定ユーザー**:
+  - システム開発者/企画担当者 … AIを使って素早く概算見積を作成する
+  - 新規事業の担当 … 要件を入力して、予算や納期を試算する
+
+## 1.3 提供機能
+
+1. **認証機能**
+   - ログイン：メールアドレス + パスワード
+   - 新規登録：ユーザ名、メールアドレス、パスワード
+2. **要件入力機能**（見積作成）
+   - 予算、目的、納期を入力
+3. **AI提案生成機能**
+   - ユーザーの要件をもとに機能一覧・デザイン案・工数・納期を推定し、提案
+4. **見積履歴管理機能**
+   - 過去の見積を検索・参照しやすい形で保存・表示する
+
+## 1.4 非機能要件
+
+1. **パフォーマンス**: 見積作成時のAI処理は数十秒以内（可能なら5秒以内）
+2. **セキュリティ**:
+   - HTTPS通信によるデータ保護
+   - パスワードはハッシュ化（本ソースコードではまだ平文のままなので要改善）
+3. **可用性**: サーバのダウンタイムを極力抑える
+4. **運用/拡張性**:
+   - GCPのMySQL
+
+## 1.5 想定利用フロー（ユーザーフロー）
+
+1. **新規ユーザー登録**（ユーザー名、メール、パスワード）
+2. **ログイン**（メール + パスワード）
+3. **メイン画面から「見積作成」へ遷移**
+4. **要件入力**（予算、目的、納期）
+5. **AI提案を確認**。デザイン選択や追加機能を検討
+6. **見積履歴を確認**、必要に応じて再提案
+
+---
+
+# 2. 基本設計書
+
+## 2.1 アーキテクチャ
+
+- **フロントエンド**:
+  - HTML Living Standard
+  - 各画面ごとに `.html` ファイルを作成する
+- **バックエンド**:
+  - Go言語 + Ginフレームワーク
+  - エンドポイント：`/login`、`/register`、`/estimate`、`/history` などを定義
+- **データベース**:
+  - GCPのMySQL
+  - User、Youken、Teian、Sentaku
+- **運用環境**:
+  - ローカル実行（`go run main.go`）+ ブラウザアクセス
+  - 将来的にはGitHubにデプロイ
+
+## 2.2 画面一覧
+
+1. **ログイン画面** (`login.html`)
+   - メールアドレス、パスワード
+2. **新規登録画面** (`register.html`)
+   - ユーザ名、メールアドレス、パスワード
+3. **メイン画面** (`main.html`)
+   - 見積作成、履歴参照などへの導線
+4. **見積画面** (`estimate.html`)
+   - 予算、目的、納期を入力 → AI提案表示
+5. **過去見積画面** (`history.html`)
+   - 過去の見積一覧・検索
+
+## 2.3 データベース構成（テーブル）
+use testMySQL
+
+1. **User**
+   - USERID（一意ID）
+   - USERNM（ユーザー名）
+   - USERML（メールアドレス）
+   - USERDT（登録日付）（YYYYMMDD形式）
+   - USERTM（登録時刻）（HHMMSS形式）
+   - USERPW（パスワード；本来はハッシュ化推奨）
+
+**例レコード**
+
+```
+0001,山田太郎,taro@example.com,20240101,100000,passTaro1
+0002,Jane Smith,jane@example.com,20240102,093000,passJane
+0003,鈴木花子,hanako@example.com,20240103,084500,12345
+```
+
+2. **Youken**
+   - YOUKID（要件ID）（一意ID）
+   - YOUSER(USERIDと結合条件)
+   - YOMKTK（目的）
+   - YOYSAN（予算）
+   - YONOKI（納期）（YYYYMMDD形式）
+   - YODATE（作成日付）（YYYYMMDD形式）
+   - YOTIME（作成時刻）（HHMMSS形式）
+
+**例レコード**
+
+```
+0001,0001,新規アプリ開発を作成、ログイン画面メイン画面となにかしら入力画面が必要です。,1000000,20240331,20240105,110000
+0002,0001,ECサイトリニューアル、JavaからPythonにリプレイス,500000,20240515,20240106,123000
+0003,0002,スマホゲーム開発、もっとなんか適当に入力できる,2000000,20240630,20240107,141500
+```
+
+3. **Teian**
+   - TEIAID（提案ID）
+   - TEUSER(USERIDと結合条件)
+   - TEIANN（AIが提案したのを格納するところ。）
+
+**例レコード**
+
+```
+0001,0001,提案した結果を格納しました1。
+0002,0002,提案した結果を格納しました2。
+0003,0003,提案した結果を格納しました3。
+0001,0001,提案した結果を格納しました4。
+```
+
+4. **Sentaku**
+   - SENTID（選択ID）（一意ID）
+   - SEUSER
+   - SEDSGN（選択デザイン）
+   - STKINO（機能選択）
+   - STKOSU（最終工数）
+   - STNOKI（最終納期）（YYYYMMDD形式）
+   - STPRCE（最終価格）
+   - STDATE（選択日付）（YYYYMMDD形式）
+   - STＴＩＭＥ（選択時刻）（HHMMSS形式）
+
+**例レコード**
+
+```
+0001,0001,2,ログイン機能、メイン画面,130,20240420,1500000,20240110,090000
+0002,0002,3,商品検索、決済,90,20240525,700000,20240112,142000
+0003,0003,1,マルチプレイ、SNS連携、ＦＰＳゲーム,210,20240725,2500000,20240105,164500
+```
+
+## 2.4 ログイン・認証
+
+- **ログイン**：`/login` への `POST` でメールアドレスとパスワードを送信 → （User）テーブルで照合
+- **新規登録**：`/register` への `POST` でユーザ名、メールアドレス、パスワードを送信 → 重複チェック後にUserテーブルに追加
+
+## 2.5 見積作成（AI提案）
+
+- **入力項目**：予算、目的、納期
+- **AI呼び出し**：Google AI StudioからAPIを取得済み
+- **提案**：機能リスト、工数、納期、デザインID候補
+- **Youken** と **Teian** に書き込み
+
+## 2.6 履歴表示
+
+- **GET `/history`**
+- **Youken** から一覧を取得
+- フロントの `history.html` でテーブル表示、フィルタ機能
+
+---
+
+# 3. 詳細設計書
+
+## 3.1 フロントエンド詳細
+
+### 3.1.1 ディレクトリ構造（フロント）
+
+```
+AiMitz/
+├─ frontend/
+│   ├─ login.html
+│   ├─ register.html
+│   ├─ main.html
+│   ├─ estimate.html
+│   ├─ history.html
+│   ├─ assets/
+│       ├─ css/
+│           └─ style.css
+│       ├─ js/
+│           └─ main.js
+│       └─ images/
+```
+
+### 3.1.2 各画面の要素
+
+1. **login.html**
+   - `<form>` で `email`、`password` を入力し、`/login` にPOSTリクエストを送信
+   - 新規登録へのリンク（`register.html`）
+
+2. **register.html**
+   - `<form>` で `username`、`email`、`password` を入力し、`/register` にPOSTリクエストを送信
+
+3. **main.html**
+   - 「見積作成」ボタン（`estimate.html` へリンク）
+   - 「過去見積履歴」ボタン（`history.html` へリンク）
+   - カーソルを合わせたらアニメーションするCSS
+
+4. **estimate.html**
+   - 予算（ドロップダウン）、目的（テキスト）、納期（カレンダー/`type="date"`）
+   - ボタン押下で `/estimate` にリクエストを送り、AI提案を画面に表示
+   - AIから提案されたデザイン（1～3）をボタン等で選択可能
+   - 予算のドロップダウンは段階的にし、2回くらいの操作で選択可能にする
+
+5. **history.html**
+   - 過去見積一覧をテーブル表示
+   - フィルタ入力欄（見積ID、予算、目的、日付）
+   - `GET /history` の結果を表示
+
+### 3.1.3 主なReactコンポーネント構成
+
+- 各 `*.html` 内で `<script>` を使用し、コンポーネントを定義
+  - `Login`、`Register`、`Main`、`Estimate`、`History` など
+- スタイルは `style.css` で一元管理
+
+---
+
+## 3.2 バックエンド詳細
+
+### 3.2.1 ディレクトリ構造（バックエンド）
+
+```
+AiMitz/
+├─ backend/
+│   ├─ main.go
+│   ├─ go.mod
+│   ├─ handlers/
+│       ├─ auth.go
+│       ├─ estimate.go
+│       └─ history.go
+│   ├─ models/
+│       ├─ user.go
+│       ├─ requirement.go
+│       └─ proposal.go
+│   ├─ services/
+│       ├─ ai_service.go
+│       └─ spreadsheet_service.go
+│   ├─ utils/
+│       ├─ config.go
+│       └─ helpers.go
+```
+
+### 3.2.2 エンドポイント
+
+1. **`POST /login`**
+   - **リクエスト**：メールアドレスとパスワードを送信
+   - **処理**：Userテーブルを検索し、成功時はユーザー情報を返却。失敗時は401エラー
+
+2. **`POST /register`**
+   - **リクエスト**：ユーザ名、メールアドレス、パスワードを送信
+   - **処理**：重複チェック後、Userテーブルに書き込み。成功時はステータス200を返却
+
+3. **`POST /estimate`**
+   - **リクエスト**：予算、目的、納期を送信
+   - **処理**：
+     - Youkenテーブルに要件を登録
+     - AI（ダミーまたは実API）で提案を生成
+     - Teianテーブルに提案を書き込み
+     - **レスポンス**：提案内容（機能一覧、デザイン候補、工数など）を返却
+
+4. **`GET /history`**
+   - **処理**：Youkenテーブルから全要件を取得し、JSON形式で返却
+   - フロント側でテーブル表示
+
+### 3.2.3 ハンドラーの概要
+
+- **auth.go**
+  - `LoginHandler(c *gin.Context)`、`RegisterHandler(c *gin.Context)`
+  - （Userテーブル）との連携
+
+- **estimate.go**
+  - `EstimateHandler(c *gin.Context)`：AI連携＋Youken/Teianテーブル更新
+
+- **history.go**
+  - `HistoryHandler(c *gin.Context)`：Youkenテーブルの全件取得
+
+- **注意**：各ファイルで共通する**APIキー**はハードコードされており、環境変数化が未実装（要改善）
+
+### 3.2.4 モデルの概要
+
+- **`user.go`**
+  - `User` 構造体：ID、Name、Email、Created、Password
+  - メソッド例：`CreateUser`、`GetUserByEmail`
+
+- **`requirement.go`**
+  - `Requirement` 構造体：ID、Purpose、Budget、Deadline、CreatedAt
+  - メソッド例：`CreateRequirement`、`GetAllRequirements`
+
+- **`proposal.go`**
+  - `Proposal` 構造体：ID、RequirementID、Features、DesignIDs、ManHours、SuggestedDue
+  - メソッド例：`CreateProposal`、`GetProposalsByRequirementID`
+
+### 3.2.5 サービスの概要
+
+- **`ai_service.go`**
+  - `AIService` インターフェース：AI提案を生成するメソッドを持つ
+  - `GetEstimateSuggestion(...)` でダミー値を返却
+  - `APIキーを使用し、サービスを生成
+
+### 3.2.6 ユーティリティの概要
+
+- **`config.go`**
+  - 環境変数や設定値を読み込む構造体を定義（サンプル実装）
+
+- **`helpers.go`**
+  - 共通処理（UUID生成、文字列整形など）を定義
+
+---
+
+## 3.3 デプロイ方法（例）
+
+1. **`go mod tidy`** で依存関係をダウンロード
+2. **`go run main.go`** でローカル起動（ポート8080）
+3. ブラウザで **`http://localhost:8080/login`** にアクセス
+
+## 3.4 API/テーブル情報
+
+1. **APIキー**：AIzaSyDzzFJHOufbGMSBAUg6OFoUCllv_IuY5sw
+2. **MySQL接続情報**：
+connection name: GCP_MySQL
+connection method: standard(TCP/IP)
+hostname: 35.187.220.47
+port: 3306
+username: root
+password: なし
+database: testMySQL
+---
+
+## まとめ
+
+- **要件定義書**：サービス全体の概要、機能要件、非機能要件を整理
+- **基本設計書**：アーキテクチャや画面構成、テーブル構造など大枠を定義
+- **詳細設計書**：各ファイル・各関数の役割やリクエストパラメータを明確化

@@ -1,0 +1,6 @@
+/* src/MainContent.css */
+.main-content {
+  flex: 1;
+  padding: 30px;
+  background-color: #ecf0f1;
+}
