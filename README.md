@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 AIで開発支援をするアプリ
 TypeScript+Reactとgoでシステム構築
+=======
+<!-- AI_Kaihatsu/README.md -->
+
+このプロジェクトは、AIを活用して設計書、開発物、テスト仕様書などを自動生成するシステムです。  
+フロントエンドはTypeScriptとReact、バックエンドはGoで実装されています。
+>>>>>>> 230decaa9af7803de717d971a0d2501337536ded
 
 #起動
 docker-compose build --no-cache
