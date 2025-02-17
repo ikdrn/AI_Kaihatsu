@@ -1,0 +1,3 @@
+AIで開発支援をするアプリ
+
+TypeScript+Reactとgoでシステム構築
