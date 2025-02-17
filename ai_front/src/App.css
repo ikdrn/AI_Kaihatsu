@@ -1,6 +1,18 @@
-/* src/App.css */
+/* AI_Kaihatsu/ai_front/src/App.css */
 .app-container {
   display: flex;
   height: 100vh;
   font-family: Arial, sans-serif;
+}
+
+.sidebar {
+  width: 200px;
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
 }

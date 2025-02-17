@@ -1,0 +1,30 @@
+/* src/css/designDocs.css */
+.design-docs {
+  margin-bottom: 20px;
+}
+
+.design-docs-toggle {
+  padding: 8px 12px;
+  border: none;
+  background-color: #6c757d;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.design-docs-list {
+  list-style: none;
+  padding: 10px 0 0 0;
+  margin: 0;
+}
+
+.design-docs-list li {
+  margin: 5px 0;
+}
+
+.design-docs-list li a {
+  text-decoration: none;
+  color: #007bff;
+}

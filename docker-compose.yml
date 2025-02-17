@@ -1,12 +1,15 @@
+# AI_Kaihatsu/docker-compose.yml
+version: '3'
+
 services:
-  backend:
+  ai_back:
     build: ./ai_back
+    container_name: ai_back
     ports:
       - "8080:8080"
-    container_name: ai_backend
 
-  frontend:
+  ai_front:
     build: ./ai_front
+    container_name: ai_front
     ports:
-      - "3000:80"
-    container_name: ai_frontend
+      - "3000:3000"

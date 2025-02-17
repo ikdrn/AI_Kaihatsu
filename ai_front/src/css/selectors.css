@@ -1,0 +1,41 @@
+/* src/css/selectors.css */
+
+/* 共通のセレクタコンテナ */
+.selector {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+
+/* 手入力用 */
+.manual-selector input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 70%;
+  margin-right: 10px;
+}
+
+.manual-selector button {
+  padding: 8px 12px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* エクスプローラー用 */
+.explorer-selector button {
+  padding: 8px 12px;
+  margin-right: 10px;
+  border: none;
+  background-color: #28a745;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.explorer-selector p {
+  font-weight: bold;
+}

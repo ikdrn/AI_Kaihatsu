@@ -1,16 +1,16 @@
-// src/App.tsx
+// AI_Kaihatsu/ai_front/src/App.tsx
 import React from 'react';
-import Sidebar from './Sidebar';
-import MainContent from './MainContent';
+import Sidebar from './components/Sidebar';
+import MainContent from './components/MainContent';
 import './App.css';
 
-const App: React.FC = () => {
+function App() {
   return (
     <div className="app-container">
       <Sidebar />
       <MainContent />
     </div>
   );
-};
+}
 
 export default App;
